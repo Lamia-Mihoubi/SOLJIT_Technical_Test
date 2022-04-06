@@ -12,6 +12,8 @@ The tasks included in this codebase are:
 
 - Retrieve all applications from Salesforce
 
+- Implement a searching endpoint
+
 ## Built With
 
 - `JavaScript` as the main programming language of the project
