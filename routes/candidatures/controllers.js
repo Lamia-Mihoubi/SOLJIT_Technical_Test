@@ -38,20 +38,27 @@ const createCandidature = async (req, res) => {
   const candidate_data = await response.json();
   res.status(200).send(candidate_data);
 };
-const getAllCandidatures = async (req, res) => {
+
+const fetchAllCandidatures = async (instanceUrl, accessToken) => {
   // TODO: implement try catch around the fetch call
   const sobject = 'Candidature__c';
   const response = await fetch(
-    `${req.session.instanceUrl}/services/data/v54.0/sobjects/${sobject}`,
+    `${instanceUrl}/services/data/v54.0/sobjects/${sobject}`,
     {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + req.session.accessToken,
+        Authorization: 'Bearer ' + accessToken,
       },
     },
   );
-  const candidatures = await response.json();
+  return await response.json();
+};
+const getAllCandidatures = async (req, res) => {
+  const candidatures = fetchAllCandidatures(
+    req.session.instanceUrl,
+    req.session.accessToken,
+  );
   res.status(200).send(candidatures);
 };
 
@@ -77,4 +84,29 @@ const editCandidature = async (req, res) => {
   res.status(200).send(candidate_data);
 };
 
-modules.exports = { getCandidature, createCandidature, getAllCandidatures };
+const searchCandidatures = async (req, res) => {
+  // TODO: implement try catch around the fetch call
+  const data = fetchAllCandidatures(
+    req.session.instanceUrl,
+    req.session.accessToken,
+  );
+  const filters = req.query;
+
+  const filteredCandidatures = data.filter((c) => {
+    let isValid = true;
+    for (key in filters) {
+      console.log(key, c[key], filters[key]);
+      isValid = isValid && c[key] == filters[key];
+    }
+    return isValid;
+  });
+
+  res.status(200).send(filteredCandidatures);
+};
+
+modules.exports = {
+  getCandidature,
+  createCandidature,
+  getAllCandidatures,
+  searchCandidatures,
+};
